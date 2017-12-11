@@ -1,1 +1,13 @@
+sudo: required
+
+services:
+  - docker
+
 language: java
+
+before_install:
+  - docker build docker/litmus
+
+install:
+  - ./gradlew clean build
+  - ./docker-test.sh
