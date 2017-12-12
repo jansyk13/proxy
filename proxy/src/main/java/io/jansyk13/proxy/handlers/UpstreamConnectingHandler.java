@@ -1,6 +1,6 @@
 package io.jansyk13.proxy.handlers;
 
-import io.jansyk13.proxy.client.DownstreamChannelManager;
+import io.jansyk13.proxy.downstream.DownstreamChannelManager;
 import io.jansyk13.proxy.events.UpstreamChannelEvent;
 import io.jansyk13.proxy.events.UpstreamChannelWritabilityChangedEvent;
 import io.jansyk13.proxy.events.UpstreamReadCompletedEvent;
@@ -57,6 +57,7 @@ public class UpstreamConnectingHandler extends SimpleChannelInboundHandler<HttpO
                 }
             });
         } else {
+            // promise might not be fulfilled
             if (!downstreamChannel.isDone()) {
                 downstreamChannel.addListener(f -> {
                     if (f.isSuccess()) {
@@ -68,8 +69,8 @@ public class UpstreamConnectingHandler extends SimpleChannelInboundHandler<HttpO
                 });
             } else if (downstreamChannel.isSuccess()) {
                 downstreamChannel.getNow().writeAndFlush(retained);
-
             } else {
+                // beware of double error transmission
                 ctx.fireExceptionCaught(downstreamChannel.cause());
             }
         }

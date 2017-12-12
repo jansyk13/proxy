@@ -1,9 +1,10 @@
 package io.jansyk13.proxy.integration
 
-import io.jansyk13.proxy.client.BootstrapSpec
-import io.jansyk13.proxy.client.SimpleDownstreamChannelManager
-import io.jansyk13.proxy.server.ServerBootstrap
-import io.jansyk13.proxy.server.ServerBootstrapSpec
+import io.jansyk13.proxy.downstream.DownstreamBootstrapSpec
+import io.jansyk13.proxy.downstream.DownstreamChannelManager
+import io.jansyk13.proxy.downstream.SimpleDownstreamChannelManager
+import io.jansyk13.proxy.upstream.UpstreamBootstrap
+import io.jansyk13.proxy.upstream.UpstreamBootstrapSpec
 import io.netty.channel.epoll.EpollEventLoopGroup
 import io.netty.util.concurrent.DefaultThreadFactory
 import net.jadler.stubbing.server.jdk.JdkStubHttpServer
@@ -18,7 +19,7 @@ import static net.jadler.Jadler.resetJadler
 abstract class IntegrationSpecification extends Specification {
 
     protected static AsyncHttpClient client
-    protected static ServerBootstrap proxy
+    protected static UpstreamBootstrap proxy
 
     def setup() {
         resetJadler()
@@ -31,17 +32,17 @@ abstract class IntegrationSpecification extends Specification {
                         .setRequestTimeout(60000)
         )
 
-        def spec = new BootstrapSpec()
+        def spec = new DownstreamBootstrapSpec()
                 .eventLoopGroup { new EpollEventLoopGroup(2, new DefaultThreadFactory("downstream")) }
                 .port(7070)
                 .traceTransport(true)
-        def channelManager = new SimpleDownstreamChannelManager(spec)
+        def channelManager = downstreamChannelManager(spec)
 
-        def serverSpec = new ServerBootstrapSpec()
+        def serverSpec = new UpstreamBootstrapSpec()
                 .eventLoopGroup { new EpollEventLoopGroup(2, new DefaultThreadFactory("upstream")) }
                 .port(8080)
                 .traceTransport(true)
-        proxy = new ServerBootstrap(serverSpec, channelManager)
+        proxy = new UpstreamBootstrap(serverSpec, channelManager)
         proxy.start()
 
 
@@ -50,5 +51,9 @@ abstract class IntegrationSpecification extends Specification {
 
     def cleanupSpec() {
         closeJadler();
+    }
+
+    DownstreamChannelManager downstreamChannelManager(DownstreamBootstrapSpec downstreamBootstrapSpec) {
+        return new SimpleDownstreamChannelManager(downstreamBootstrapSpec)
     }
 }

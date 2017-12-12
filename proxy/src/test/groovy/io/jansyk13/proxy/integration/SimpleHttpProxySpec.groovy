@@ -7,7 +7,7 @@ import spock.lang.Unroll
 import java.util.concurrent.TimeUnit
 
 @Unroll
-class ProxySpec extends IntegrationSpecification {
+class SimpleHttpProxySpec extends IntegrationSpecification {
 
     def 'proxy HTTP requests method=#method status=#status'() {
         given:
@@ -23,7 +23,7 @@ class ProxySpec extends IntegrationSpecification {
         future.get().statusCode == status
 
         where:
-        method   | status
+        method   | requestBody | status | responseBody
         "GET"    | 200
         "GET"    | 300
         "GET"    | 400

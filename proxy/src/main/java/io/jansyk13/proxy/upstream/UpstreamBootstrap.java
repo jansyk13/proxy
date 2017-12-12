@@ -1,7 +1,7 @@
-package io.jansyk13.proxy.server;
+package io.jansyk13.proxy.upstream;
 
 import io.jansyk13.proxy.handlers.UpstreamConnectingHandler;
-import io.jansyk13.proxy.client.DownstreamChannelManager;
+import io.jansyk13.proxy.downstream.DownstreamChannelManager;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -15,9 +15,9 @@ import io.vavr.Tuple2;
 
 import java.util.Objects;
 
-public class ServerBootstrap {
+public class UpstreamBootstrap {
 
-    private final ServerBootstrapSpec serverBootstrapSpec;
+    private final UpstreamBootstrapSpec upstreamBootstrapSpec;
     private final DownstreamChannelManager downstreamChannelManager;
 
     private volatile boolean started;
@@ -25,8 +25,8 @@ public class ServerBootstrap {
     private io.netty.bootstrap.ServerBootstrap bootstrap;
     private EventLoopGroup group;
 
-    public ServerBootstrap(final ServerBootstrapSpec serverBootstrapSpec, final DownstreamChannelManager downstreamChannelManager) {
-        this.serverBootstrapSpec = Objects.requireNonNull(serverBootstrapSpec);
+    public UpstreamBootstrap(final UpstreamBootstrapSpec upstreamBootstrapSpec, final DownstreamChannelManager downstreamChannelManager) {
+        this.upstreamBootstrapSpec = Objects.requireNonNull(upstreamBootstrapSpec);
         this.downstreamChannelManager = Objects.requireNonNull(downstreamChannelManager);
     }
 
@@ -35,10 +35,10 @@ public class ServerBootstrap {
             throw new IllegalStateException("Already started");
         }
 
-        this.group = serverBootstrapSpec.getEventLoopGroup();
+        this.group = upstreamBootstrapSpec.getEventLoopGroup();
         this.bootstrap = new io.netty.bootstrap.ServerBootstrap()
                 .group(group)
-                .channel(serverBootstrapSpec.getChannel());
+                .channel(upstreamBootstrapSpec.getChannel());
 
 
         bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
@@ -46,7 +46,7 @@ public class ServerBootstrap {
             protected void initChannel(SocketChannel ch) throws Exception {
                 ChannelPipeline pipeline = ch.pipeline();
 
-                if (serverBootstrapSpec.getTraceTransport()) {
+                if (upstreamBootstrapSpec.getTraceTransport()) {
                     pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                 }
 
@@ -58,11 +58,11 @@ public class ServerBootstrap {
         });
 
 
-        for (Tuple2<ChannelOption, ?> tuple : serverBootstrapSpec.getOptions()) {
+        for (Tuple2<ChannelOption, ?> tuple : upstreamBootstrapSpec.getOptions()) {
             this.bootstrap.option(tuple._1, tuple._2);
         }
 
-        this.bootstrap.bind(serverBootstrapSpec.getPort()).sync();
+        this.bootstrap.bind(upstreamBootstrapSpec.getPort()).sync();
 
         started = true;
     }

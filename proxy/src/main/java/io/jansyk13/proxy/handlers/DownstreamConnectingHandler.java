@@ -1,6 +1,6 @@
 package io.jansyk13.proxy.handlers;
 
-import io.jansyk13.proxy.client.ChannelDisposer;
+import io.jansyk13.proxy.downstream.DownstreamChannelDisposer;
 import io.jansyk13.proxy.events.DownstreamChannelEvent;
 import io.jansyk13.proxy.events.DownstreamChannelWritabilityChangedEvent;
 import io.jansyk13.proxy.events.DownstreamReadCompletedEvent;
@@ -13,14 +13,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DownstreamConnectingHandler extends SimpleChannelInboundHandler<HttpObject> {
 
-    private final ChannelDisposer downstreamChannelDisposer;
+    private final DownstreamChannelDisposer downstreamDownstreamChannelDisposer;
     private final Channel upstreamChannel;
 
     //TODO replace with AtomicIntegerFieldUpdater
     private AtomicBoolean disposed = new AtomicBoolean(false);
 
-    public DownstreamConnectingHandler(ChannelDisposer downstreamChannelDisposer, Channel upstreamChannel) {
-        this.downstreamChannelDisposer = downstreamChannelDisposer;
+    public DownstreamConnectingHandler(DownstreamChannelDisposer downstreamDownstreamChannelDisposer, Channel upstreamChannel) {
+        this.downstreamDownstreamChannelDisposer = downstreamDownstreamChannelDisposer;
         this.upstreamChannel = upstreamChannel;
     }
 
@@ -62,7 +62,7 @@ public class DownstreamConnectingHandler extends SimpleChannelInboundHandler<Htt
     private void dispose(ChannelHandlerContext ctx) {
         if (disposed.compareAndSet(false, true)) {
             ctx.pipeline().remove(this);
-            downstreamChannelDisposer.dispose(ctx.channel());
+            downstreamDownstreamChannelDisposer.dispose(ctx.channel());
         }
     }
 }

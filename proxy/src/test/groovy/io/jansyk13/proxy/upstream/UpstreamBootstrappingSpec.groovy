@@ -1,9 +1,7 @@
-package io.jansyk13.proxy
+package io.jansyk13.proxy.upstream
 
-import io.jansyk13.proxy.client.ChannelDisposer
-import io.jansyk13.proxy.client.DownstreamChannelManager
-import io.jansyk13.proxy.server.ServerBootstrap
-import io.jansyk13.proxy.server.ServerBootstrapSpec
+import io.jansyk13.proxy.downstream.DownstreamChannelDisposer
+import io.jansyk13.proxy.downstream.DownstreamChannelManager
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelOption
@@ -16,18 +14,18 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 @Unroll
-class ServerBootstrappingSpec extends Specification {
+class UpstreamBootstrappingSpec extends Specification {
 
     def 'bootstrap works'() {
         given:
-        def bootstrap = new ServerBootstrap(spec, new DownstreamChannelManager() {
+        def bootstrap = new UpstreamBootstrap(spec, new DownstreamChannelManager(downstreamBootstrapSpec) {
             @Override
             Promise<Channel> provide(HttpRequest httpRequest, ChannelHandlerContext channelHandlerContext) {
                 return null
             }
 
             @Override
-            ChannelDisposer disposer() {
+            DownstreamChannelDisposer disposer() {
                 return null
             }
         })
@@ -40,15 +38,15 @@ class ServerBootstrappingSpec extends Specification {
 
         where:
         spec << [
-                new ServerBootstrapSpec(),
-                new ServerBootstrapSpec()
+                new UpstreamBootstrapSpec(),
+                new UpstreamBootstrapSpec()
                         .port(8080),
-                new ServerBootstrapSpec()
+                new UpstreamBootstrapSpec()
                         .eventLoopGroup { new NioEventLoopGroup() }
                         .channel(NioServerSocketChannel),
-                new ServerBootstrapSpec()
+                new UpstreamBootstrapSpec()
                         .traceTransport(true),
-                new ServerBootstrapSpec()
+                new UpstreamBootstrapSpec()
                         .option(Tuple2.of(ChannelOption.SO_BACKLOG, 100))
         ]
     }

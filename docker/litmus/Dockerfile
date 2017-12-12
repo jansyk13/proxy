@@ -1,16 +1,15 @@
-FROM ubuntu:14.04
-ENV DEBIAN_FRONTEND noninteractive
+FROM centos/systemd
 
-RUN apt-get update
-RUN apt-get -y install apache2 git
+RUN yum -y install httpd git less vim gcc make epel-release; yum clean all; systemctl enable httpd.service
 
-RUN a2enmod dav
-RUN a2enmod dav_fs
+EXPOSE 80
 
-RUN mkdir /var/www/webdav
-RUN chown -R www-data:www-data /var/www/
+RUN mkdir /var/www/html/webdav
+RUN chown -R apache:apache /var/www/html
+RUN chmod -R 755 /var/www/html/webdav
 
-RUN service apache2 stop
-RUN service apache2 start
+COPY webdav.conf /etc/httpd/conf.d/webdav.conf
 
-RUN git clone https://github.com/tolsen/litmus.git /root/litmus
+RUN yum -y install litmus
+
+CMD ["/usr/sbin/init"]

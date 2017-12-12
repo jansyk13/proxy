@@ -1,4 +1,4 @@
-package io.jansyk13.proxy.server;
+package io.jansyk13.proxy.upstream;
 
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-public class ServerBootstrapSpec {
+public class UpstreamBootstrapSpec {
 
     private Supplier<? extends EventLoopGroup> eventLoopGroup = () -> new EpollEventLoopGroup(
             Runtime.getRuntime().availableProcessors() * 2,
@@ -23,28 +23,28 @@ public class ServerBootstrapSpec {
     private Collection<Tuple2<ChannelOption, ?>> options = new ArrayList<>();
     private boolean traceTransport;
 
-    public ServerBootstrapSpec eventLoopGroup(Supplier<EventLoopGroup> eventLoopGroup) {
+    public UpstreamBootstrapSpec eventLoopGroup(Supplier<EventLoopGroup> eventLoopGroup) {
         this.eventLoopGroup = eventLoopGroup;
         return this;
     }
 
-    public ServerBootstrapSpec channel(Class<? extends ServerChannel> channel) {
+    public UpstreamBootstrapSpec channel(Class<? extends ServerChannel> channel) {
         this.channel = channel;
         return this;
     }
 
 
-    public ServerBootstrapSpec option(Tuple2<ChannelOption, ?> option) {
+    public UpstreamBootstrapSpec option(Tuple2<ChannelOption, ?> option) {
         this.options.add(option);
         return this;
     }
 
-    public ServerBootstrapSpec port(int port) {
+    public UpstreamBootstrapSpec port(int port) {
         this.port = port;
         return this;
     }
 
-    public ServerBootstrapSpec traceTransport(boolean traceTransport) {
+    public UpstreamBootstrapSpec traceTransport(boolean traceTransport) {
         this.traceTransport = traceTransport;
         return this;
     }
