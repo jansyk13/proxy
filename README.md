@@ -1,4 +1,4 @@
-# HTTP and WebDav proxy
+# HTTP and WebDav proxy [![Build Status](https://travis-ci.org/jansyk13/proxy.svg?branch=master)](https://travis-ci.org/jansyk13/proxy)
 ### Concepts
 * Handler does one thing
 * Handler is responsible for removing itself from pipeline when needed
