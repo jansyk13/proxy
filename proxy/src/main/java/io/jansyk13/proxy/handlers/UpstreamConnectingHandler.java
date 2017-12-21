@@ -34,7 +34,10 @@ public class UpstreamConnectingHandler extends SimpleChannelInboundHandler<HttpO
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
-        HttpObject retained = ReferenceCountUtil.retain(msg);
+        // TODO replace with ChannelInboundHandlerAdapter to avoid retaining twice?
+        // increase by two because channelRead in SimpleChannelInboundHandler releases and write
+        // to downstream channel is future
+        HttpObject retained = ReferenceCountUtil.retain(msg, 2);
         if (msg instanceof HttpRequest) {
             //stop reading until downstream
             ctx.channel().config().setAutoRead(false);
@@ -108,6 +111,6 @@ public class UpstreamConnectingHandler extends SimpleChannelInboundHandler<HttpO
     }
 
     private boolean downstreamChannelPresentAndActive() {
-        return downstreamChannel.isSuccess() && downstreamChannel.getNow().isActive() ? true : false;
+        return downstreamChannel.isSuccess() ? downstreamChannel.getNow().isActive() : false;
     }
 }

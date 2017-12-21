@@ -8,6 +8,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.HttpObject;
+import io.netty.handler.codec.http.LastHttpContent;
+import io.netty.util.ReferenceCountUtil;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -26,7 +28,12 @@ public class DownstreamConnectingHandler extends SimpleChannelInboundHandler<Htt
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
-        upstreamChannel.writeAndFlush(msg);
+        // increase by two because channelRead in SimpleChannelInboundHandler releases and write
+        // to upstream channel is future
+        upstreamChannel.writeAndFlush(ReferenceCountUtil.retain(msg, 2));
+        if (msg instanceof LastHttpContent) {
+            dispose(ctx);
+        }
     }
 
     @Override
@@ -34,7 +41,6 @@ public class DownstreamConnectingHandler extends SimpleChannelInboundHandler<Htt
         if (upstreamChannel.isActive()) {
             upstreamChannel.pipeline().fireUserEventTriggered(new DownstreamReadCompletedEvent());
         }
-        dispose(ctx);
     }
 
     @Override

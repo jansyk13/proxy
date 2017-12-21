@@ -1,5 +1,6 @@
 package io.jansyk13.proxy.upstream
 
+import io.jansyk13.proxy.downstream.DownstreamBootstrapSpec
 import io.jansyk13.proxy.downstream.DownstreamChannelDisposer
 import io.jansyk13.proxy.downstream.DownstreamChannelManager
 import io.netty.channel.Channel
@@ -18,7 +19,7 @@ class UpstreamBootstrappingSpec extends Specification {
 
     def 'bootstrap works'() {
         given:
-        def bootstrap = new UpstreamBootstrap(spec, new DownstreamChannelManager(downstreamBootstrapSpec) {
+        def bootstrap = new UpstreamBootstrap(spec, new DownstreamChannelManager(new DownstreamBootstrapSpec()) {
             @Override
             Promise<Channel> provide(HttpRequest httpRequest, ChannelHandlerContext channelHandlerContext) {
                 return null
@@ -40,7 +41,7 @@ class UpstreamBootstrappingSpec extends Specification {
         spec << [
                 new UpstreamBootstrapSpec(),
                 new UpstreamBootstrapSpec()
-                        .port(8080),
+                        .port(8088),
                 new UpstreamBootstrapSpec()
                         .eventLoopGroup { new NioEventLoopGroup() }
                         .channel(NioServerSocketChannel),

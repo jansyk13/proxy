@@ -2,6 +2,8 @@ package io.jansyk13.proxy.upstream;
 
 import io.jansyk13.proxy.handlers.UpstreamConnectingHandler;
 import io.jansyk13.proxy.downstream.DownstreamChannelManager;
+import io.jansyk13.proxy.log.First;
+import io.jansyk13.proxy.log.BeforeConnecting;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -47,12 +49,15 @@ public class UpstreamBootstrap {
                 ChannelPipeline pipeline = ch.pipeline();
 
                 if (upstreamBootstrapSpec.getTraceTransport()) {
-                    pipeline.addLast(new LoggingHandler(LogLevel.INFO));
+                    pipeline.addLast(new LoggingHandler(First.class, LogLevel.INFO));
                 }
 
                 pipeline.addLast(new HttpRequestDecoder());
                 pipeline.addLast(new HttpResponseEncoder());
 
+                if (upstreamBootstrapSpec.getTraceTransport()) {
+                    pipeline.addLast(new LoggingHandler(BeforeConnecting.class, LogLevel.INFO));
+                }
                 pipeline.addLast(new UpstreamConnectingHandler(downstreamChannelManager));
             }
         });

@@ -1,5 +1,6 @@
 package io.jansyk13.proxy.downstream;
 
+import io.jansyk13.proxy.log.BeforeConnecting;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -57,6 +58,10 @@ public abstract class DownstreamChannelManager {
                 pipeline.addLast(new ReadTimeoutHandler(downstreamBootstrapSpec.getReadTimeoutInSeconds(), TimeUnit.SECONDS));
                 pipeline.addLast(new HttpRequestEncoder());
                 pipeline.addLast(new HttpResponseDecoder());
+
+                if (downstreamBootstrapSpec.getTraceTransport()) {
+                    pipeline.addLast(new LoggingHandler(BeforeConnecting.class, LogLevel.INFO));
+                }
             }
         };
     }

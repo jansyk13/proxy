@@ -13,6 +13,7 @@
     * Litmus test
 * Reuses connections
 * HTTP pipelining
+* Flush on read complete events or on some size? 
 * Fire events to correct part of channel pipeline ? Could speed up stuff
 ### Vocabulary:
 ```
